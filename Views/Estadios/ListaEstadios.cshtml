@@ -1,0 +1,129 @@
+﻿@{
+    ViewBag.Title = "Lista Estadios";
+}
+
+<h2>Administrar Estadios</h2>
+<button id="btnOpenDialog" class="btn btn-primary">Registrar Estadio</button>
+
+<div id="dialog" title="Registrar Estadio" style="display: none;">
+    <form id="formEstadio">
+        <div class="form-group">
+            <label for="IdPais">País:</label>
+            <select id="IdPais" name="IdPais" class="form-control" required>
+                <option value="">Seleccione un país</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="IdCiudad">Ciudad:</label>
+            <select id="IdCiudad" name="IdCiudad" class="form-control" required>
+                <option value="">Seleccione una ciudad</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="Nombre">Nombre:</label>
+            <input type="text" id="Nombre" name="Nombre" class="form-control" maxlength="100" required />
+        </div>
+        <div class="form-group">
+            <label for="Capacidad">Capacidad:</label>
+            <input type="number" id="Capacidad" name="Capacidad" class="form-control" required />
+        </div>
+        <button type="submit" id="btnInsertar" class="btn btn-primary">Insertar</button>
+    </form>
+</div>
+
+<table id="estadiosTable" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Capacidad</th>
+            <th>Ciudad</th>
+        </tr>
+    </thead>
+</table>
+
+@section Scripts {
+    <!-- Add jQuery and jQuery UI (local references) -->
+    <script src="~/lib/jquery/jquery-3.7.0.min.js"></script>
+    <script src="~/lib/jquery-ui/jquery-ui.min.js"></script>
+
+    <!-- Add jQuery UI CSS -->
+    <link rel="stylesheet" href="~/lib/jquery-ui/jquery-ui.min.css">
+
+    <!-- DataTables Script -->
+    <script src="https://cdn.datatables.net/v/dt/dt-2.1.8/datatables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable
+            const table = $('#estadiosTable').DataTable({
+                ajax: {
+                    url: '@Url.Action("Estadios", "Estadios")',
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: 'Id_Estadio', title: 'ID' },
+                    { data: 'Nombre', title: 'Nombre' },
+                    { data: 'Capacidad', title: 'Capacidad' },
+                    { data: 'DatosCiudad', title: 'Ciudad' }
+                ]
+            });
+
+            // Initialize the dialog
+            $("#dialog").dialog({
+                autoOpen: true,
+                modal: true,
+                width: 500
+            });
+
+            // Open dialog on button click
+            $("#btnOpenDialog").click(function () {
+                $("#dialog").dialog("open");
+            });
+
+            // Populate Country Dropdown
+            $.getJSON('@Url.Action("RetornaPaises", "Estadios")', function (data) {
+                $("#IdPais").empty().append('<option value="">Seleccione un país</option>');
+                $.each(data, function (i, item) {
+                    $("#IdPais").append('<option value="' + item.Id + '">' + item.Nombre + '</option>');
+                });
+            });
+
+            // Load Cities When Country Changes
+            $("#IdPais").change(function () {
+                const countryId = $(this).val();
+                if (countryId) {
+                    $.getJSON('@Url.Action("Ciudades", "Estadios")', { idPais: countryId }, function (data) {
+                        $("#IdCiudad").empty().append('<option value="">Seleccione una ciudad</option>');
+                        $.each(data, function (i, item) {
+                            $("#IdCiudad").append('<option value="' + item.Id + '">' + item.Nombre + '</option>');
+                        });
+                    });
+                } else {
+                    $("#IdCiudad").empty().append('<option value="">Seleccione una ciudad</option>');
+                }
+            });
+
+            // Handle Form Submission
+            $("#formEstadio").submit(function (e) {
+                e.preventDefault(); // Prevent default form submission
+                const form = $(this);
+                if (form.valid()) {
+                    $.ajax({
+                        url: '@Url.Action("InsertaEstadio", "Estadios")',
+                        type: 'POST',
+                        data: form.serialize(),
+                        success: function (response) {
+                            alert(response); // Show success message
+                            $("#dialog").dialog("close");
+                            table.ajax.reload(); // Reload table data
+                        },
+                        error: function (xhr) {
+                            alert(`Error: ${xhr.responseText}`);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}
