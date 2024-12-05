@@ -43,17 +43,17 @@
 </table>
 
 @section Scripts {
-    <!-- Add jQuery and jQuery UI (local references) -->
-    <script src="~/lib/jquery/jquery-3.7.0.min.js"></script>
-    <script src="~/lib/jquery-ui/jquery-ui.min.js"></script>
-
-    <!-- Add jQuery UI CSS -->
-    <link rel="stylesheet" href="~/lib/jquery-ui/jquery-ui.min.css">
+    <!-- Use CDNs for jQuery and jQuery UI -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.min.css">
 
     <!-- DataTables Script -->
     <script src="https://cdn.datatables.net/v/dt/dt-2.1.8/datatables.min.js"></script>
 
     <script>
+        $("<div>Test Dialog</div>").dialog(); // Test dialog
+
         $(document).ready(function () {
             // Initialize DataTable
             const table = $('#estadiosTable').DataTable({
@@ -71,7 +71,7 @@
 
             // Initialize the dialog
             $("#dialog").dialog({
-                autoOpen: true,
+                autoOpen: false,
                 modal: true,
                 width: 500
             });
