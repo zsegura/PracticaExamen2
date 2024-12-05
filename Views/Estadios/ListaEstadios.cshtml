@@ -25,9 +25,9 @@
         </div>
         <div class="form-group">
             <label for="Capacidad">Capacidad:</label>
-            <input type="number" id="Capacidad" name="Capacidad" class="form-control" required />
+            <input type="number" id="Capacidad" name="Capacidad" class="form-control" required min="1" />
         </div>
-        <button type="submit" id="btnInsertar" class="btn btn-primary">Insertar</button>
+        <button type="button" id="btnInsertar" class="btn btn-primary">Insertar</button>
     </form>
 </div>
 
@@ -52,8 +52,6 @@
     <script src="https://cdn.datatables.net/v/dt/dt-2.1.8/datatables.min.js"></script>
 
     <script>
-        $("<div>Test Dialog</div>").dialog(); // Test dialog
-
         $(document).ready(function () {
             // Initialize DataTable
             const table = $('#estadiosTable').DataTable({
@@ -69,7 +67,7 @@
                 ]
             });
 
-            // Initialize the dialog
+            // Initialize dialog
             $("#dialog").dialog({
                 autoOpen: false,
                 modal: true,
@@ -89,7 +87,7 @@
                 });
             });
 
-            // Load Cities When Country Changes
+            // Load cities when country changes
             $("#IdPais").change(function () {
                 const countryId = $(this).val();
                 if (countryId) {
@@ -104,25 +102,23 @@
                 }
             });
 
-            // Handle Form Submission
-            $("#formEstadio").submit(function (e) {
-                e.preventDefault(); // Prevent default form submission
-                const form = $(this);
-                if (form.valid()) {
-                    $.ajax({
-                        url: '@Url.Action("InsertaEstadio", "Estadios")',
-                        type: 'POST',
-                        data: form.serialize(),
-                        success: function (response) {
-                            alert(response); // Show success message
-                            $("#dialog").dialog("close");
-                            table.ajax.reload(); // Reload table data
-                        },
-                        error: function (xhr) {
-                            alert(`Error: ${xhr.responseText}`);
-                        }
-                    });
-                }
+            // Handle form submission without validation
+            $("#btnInsertar").click(function () {
+                const form = $("#formEstadio");
+
+                $.ajax({
+                    url: '@Url.Action("InsertaEstadio", "Estadios")',
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function (response) {
+                        alert(response); // Show success message
+                        $("#dialog").dialog("close"); // Close the dialog
+                        table.ajax.reload(); // Reload DataTable
+                    },
+                    error: function (xhr) {
+                        alert(`Error: ${xhr.responseText}`); // Show error message
+                    }
+                });
             });
         });
     </script>

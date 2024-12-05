@@ -27,45 +27,6 @@ namespace PracticaExamen2.Controllers
             return Json(new { data = estadios }, JsonRequestBehavior.AllowGet);
         }
 
-        // Load the Insert/Edit Estadio form
-        public ActionResult RegistrarEstadio()
-        {
-            using (var db = new EstadiosDB("MyDatabase"))
-            {
-                ViewBag.Paises = new SelectList(db.SpRetornaPais().ToList(), "Id_Pais", "DatosPais");
-                ViewBag.Ciudades = new SelectList(Enumerable.Empty<SelectListItem>(), "Id_Ciudad", "DatosCiudad");
-            }
-            return View();
-        }
-
-
-        // Insert or notify that updates are not supported
-        [HttpPost]
-        public JsonResult RegistrarEstadio(ModelEstadio estadio)
-        {
-            string resultado;
-            try
-            {
-                if (estadio == null || string.IsNullOrEmpty(estadio.Nombre) || estadio.Capacidad <= 0 || estadio.IdCiudad <= 0)
-                {
-                    return Json("Datos incompletos o inválidos.", JsonRequestBehavior.AllowGet);
-                }
-
-                using (var db = new EstadiosDB("MyDatabase"))
-                {
-                    db.SpInsertaEstadioCiudad(estadio.IdCiudad, estadio.Nombre, estadio.Capacidad);
-                    resultado = "El estadio ha sido registrado exitosamente.";
-                }
-            }
-            catch (Exception ex)
-            {
-                resultado = $"Error al registrar el estadio: {ex.Message}";
-            }
-            return Json(resultado, JsonRequestBehavior.AllowGet);
-        }
-
-
-
         // Fetch all default cities for dropdown
         public JsonResult DefaultCiudades()
         {
@@ -122,20 +83,27 @@ namespace PracticaExamen2.Controllers
         [HttpPost]
         public JsonResult InsertaEstadio(ModelEstadio estadio)
         {
-            string resultado;
             try
             {
+                // Validate input
+                if (estadio == null || string.IsNullOrEmpty(estadio.Nombre) || estadio.Capacidad <= 0 || estadio.IdCiudad <= 0)
+                {
+                    return Json("Datos incompletos o inválidos. Verifique e intente nuevamente.");
+                }
+
+                // Save data using the database context
                 using (var db = new EstadiosDB("MyDatabase"))
                 {
                     db.SpInsertaEstadioCiudad(estadio.IdCiudad, estadio.Nombre, estadio.Capacidad);
-                    resultado = "El estadio se ha insertado correctamente.";
                 }
+
+                return Json("El estadio se ha registrado exitosamente.");
             }
             catch (Exception ex)
             {
-                resultado = $"Error al insertar el estadio: {ex.Message}";
+                return Json($"Error al registrar el estadio: {ex.Message}");
             }
-            return Json(resultado);
         }
+
     }
 }
